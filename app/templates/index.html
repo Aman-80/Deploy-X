@@ -1231,32 +1231,98 @@ function navRenderRunCards(container, runs) {
 
 async function navRenderContainers() {
     navPanel.replaceChildren();
-    navPanel.appendChild(navElement("h2", "Service Health", "section-title"));
+
+    navPanel.appendChild(
+        navElement("h2", "Docker Containers", "section-title")
+    );
+
+    const refreshButton = navButton(
+        "Refresh Containers",
+        async event => {
+            event.currentTarget.disabled = true;
+            event.currentTarget.textContent = "Refreshing...";
+            await navRenderContainers();
+        }
+    );
+
+    navPanel.appendChild(refreshButton);
 
     try {
-        const [healthResponse, statusResponse] = await Promise.all([
-            navRequest("/health"),
-            navRequest("/api/status")
-        ]);
+        const [healthResponse, statusResponse, dockerResponse] =
+            await Promise.all([
+                navRequest("/health"),
+                navRequest("/api/status"),
+                navRequest("/api/containers")
+            ]);
+
+        navPanel.appendChild(navCard(
+            "DeployX Web API",
+            `Status: ${healthResponse.status}`
+        ));
+
+        navPanel.appendChild(navCard(
+            "Repository Database",
+            `API status: ${statusResponse.status} · ` +
+            `Registered repositories: ${statusResponse.repositories}`
+        ));
+
+        const containers = dockerResponse.containers || [];
+
+        const runningCount = containers.filter(
+            container => container.state === "running"
+        ).length;
+
+        const stoppedCount = containers.length - runningCount;
+
+        navPanel.appendChild(navCard(
+            "Docker Engine Overview",
+            `Total: ${containers.length} · ` +
+            `Running: ${runningCount} · ` +
+            `Stopped: ${stoppedCount}`
+        ));
 
         navPanel.appendChild(
-            navCard(
-                "DeployX Web API",
-                `Status: ${healthResponse.status}`
-            )
+            navElement("h2", "Container Details", "section-title")
         );
 
-        navPanel.appendChild(
-            navCard(
-                "Repository Database",
-                `API status: ${statusResponse.status} · ` +
-                `Registered repositories: ${statusResponse.repositories}`
-            )
-        );
+        if (containers.length === 0) {
+            navPanel.appendChild(
+                navElement("p", "No Docker containers found.")
+            );
+        }
+
+        containers.forEach(container => {
+            const isRunning = container.state === "running";
+
+            const ports = [
+                ...new Set(
+                    (container.ports || []).map(port =>
+                        port.public
+                            ? `${port.public} → ${port.private}/${port.type}`
+                            : `${port.private}/${port.type} (internal)`
+                    )
+                )
+            ];
+
+            const details = [
+                `Image: ${container.image}`,
+                `ID: ${container.id}`,
+                `State: ${container.state}`,
+                `Status: ${container.status}`,
+                `Ports: ${ports.join(", ") || "None"}`
+            ].join(" · ");
+
+            navPanel.appendChild(
+                navCard(
+                    `${isRunning ? "🟢" : "⚪"} ${container.name}`,
+                    details
+                )
+            );
+        });
 
         const guiCard = navCard(
             "Smart Route Analyzer GUI",
-            "Browser-accessible GUI service on the local machine."
+            "Browser-accessible GUI service."
         );
 
         const guiLink = navElement("a", "Open GUI Console");
@@ -1269,11 +1335,6 @@ async function navRenderContainers() {
         guiCard.appendChild(guiLink);
         navPanel.appendChild(guiCard);
 
-        navPanel.appendChild(navCard(
-            "Worker API",
-            "This service runs on the private Docker network. Its individual " +
-            "health is not yet exposed through a dashboard endpoint."
-        ));
     } catch (error) {
         navShowMessage(navPanel, error.message, false);
     }

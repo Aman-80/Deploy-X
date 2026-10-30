@@ -17,6 +17,10 @@ DB_PATH = "/data/deployx.db"
 REPOSITORIES_PATH = "/repositories"
 WORKER_API_URL = "http://deployx-worker-api:8000"
 GUI_CONTROLLER_URL = "http://deployx-gui:6082"
+DOCKER_API_URL = os.environ.get(
+    "DOCKER_API_URL",
+    "http://docker-monitoring-gateway:8080"
+)
 
 
 def get_db():
@@ -155,6 +159,64 @@ def status():
         "timestamp": datetime.now(timezone.utc).isoformat()
     })
 
+@app.get("/api/containers")
+def list_docker_containers():
+    try:
+        docker_request = Request(
+            f"{DOCKER_API_URL}/containers/json?all=1",
+            headers={"Accept": "application/json"},
+            method="GET"
+        )
+
+        with urlopen(docker_request, timeout=5) as response:
+            containers = json.loads(
+                response.read().decode("utf-8")
+            )
+
+        if not isinstance(containers, list):
+            return jsonify({
+                "error": "Unexpected response from Docker API"
+            }), 502
+
+        container_list = []
+
+        for container in containers:
+            ports = container.get("Ports") or []
+            names = container.get("Names") or []
+
+            container_list.append({
+                "id": container.get("Id", "")[:12],
+                "name": ", ".join(
+                    name.lstrip("/")
+                    for name in names
+                    if isinstance(name, str)
+                ),
+                "image": container.get("Image", "Unknown"),
+                "state": container.get("State", "unknown"),
+                "status": container.get("Status", ""),
+                "ports": [
+                    {
+                        "ip": port.get("IP", ""),
+                        "private": port.get("PrivatePort"),
+                        "public": port.get("PublicPort"),
+                        "type": port.get("Type", "")
+                    }
+                    for port in ports
+                    if isinstance(port, dict)
+                ]
+            })
+
+        return jsonify({
+            "containers": container_list,
+            "count": len(container_list),
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        })
+
+    except (HTTPError, URLError, TimeoutError, OSError, ValueError) as error:
+        return jsonify({
+            "error": "Docker monitoring is unavailable",
+            "details": str(error)
+        }), 502
 
 @app.get("/api/pipeline-runs")
 def list_pipeline_runs():

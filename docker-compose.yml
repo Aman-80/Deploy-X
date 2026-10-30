@@ -7,6 +7,11 @@ services:
     container_name: deployx-app
     ports:
       - "5001:5000"
+    environment:
+      DOCKER_API_URL: "http://docker-monitoring-gateway:8080"
+    networks:
+      - default
+      - monitoring-api
     volumes:
       - deployx-data:/data
       - deployx-repos:/repositories:ro
@@ -56,8 +61,44 @@ services:
       - deployx-artifacts:/artifacts:ro
     restart: unless-stopped
 
+  docker-socket-proxy:
+    image: tecnativa/docker-socket-proxy:latest
+    container_name: deployx-docker-socket-proxy
+    environment:
+      CONTAINERS: "1"
+      INFO: "1"
+      PING: "1"
+      VERSION: "1"
+      POST: "0"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    expose:
+      - "2375"
+    networks:
+      - docker-backend
+    restart: unless-stopped
+
+  docker-monitoring-gateway:
+    image: nginx:alpine
+    container_name: deployx-monitoring-gateway
+    volumes:
+      - ./monitoring/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    expose:
+      - "8080"
+    networks:
+      - monitoring-api
+      - docker-backend
+    restart: unless-stopped
+
 volumes:
   deployx-data:
   deployx-repos:
   deployx-artifacts:
   deployx-gui-data:
+
+networks:
+  default:
+  monitoring-api:
+    internal: true
+  docker-backend:
+    internal: true
