@@ -1,0 +1,23 @@
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Secrets and environment files
+.env
+.env.*
+!.env.example
+
+# Local databases and logs
+*.db
+*.sqlite
+*.sqlite3
+*.log
+
+# Generated build artifacts
+downloaded-artifact-*.zip
+artifacts/
+
+# Test and editor cache
+.pytest_cache/
+.mypy_cache/

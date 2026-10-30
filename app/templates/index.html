@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeployX | DevOps Platform</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #0b1120;
+            color: #e5e7eb;
+        }
+
+        .layout { display: flex; min-height: 100vh; }
+
+        aside {
+            width: 235px;
+            flex-shrink: 0;
+            background: #101a2d;
+            border-right: 1px solid #26344c;
+            padding: 28px 18px;
+        }
+
+        .brand {
+            font-size: 25px;
+            font-weight: 750;
+            color: #60a5fa;
+            margin-bottom: 9px;
+        }
+
+        .tagline {
+            font-size: 12px;
+            color: #8494ad;
+            margin-bottom: 38px;
+        }
+
+        .nav-label {
+            color: #71829d;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin: 24px 10px 12px;
+        }
+
+
+
+        .nav-item {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 5px 0;
+            border-radius: 8px;
+            color: #aebbd0;
+            font-size: 14px;
+            font-family: inherit;
+            text-align: left;
+            background: transparent;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: #17253b;
+            color: #dbeafe;
+        }
+
+        .nav-item.active {
+            background: #1c3557;
+            color: #93c5fd;
+            border: 1px solid #284d78;
+        }
+
+
+        main { flex: 1; min-width: 0; padding: 32px; }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        h1 { font-size: 28px; letter-spacing: -0.6px; }
+        .subtitle { color: #91a0b7; font-size: 14px; margin-top: 8px; }
+
+        .status {
+            color: #86efac;
+            background: #123126;
+            border: 1px solid #20563f;
+            border-radius: 20px;
+            padding: 9px 13px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .section-title { font-size: 17px; margin-bottom: 16px; }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: #111c30;
+            border: 1px solid #263650;
+            border-radius: 13px;
+            padding: 21px;
+            min-width: 0;
+        }
+
+        .stat-label { color: #91a0b7; font-size: 13px; }
+        .stat-number { font-size: 30px; font-weight: 700; margin: 15px 0 8px; }
+        .stat-note { color: #8192ac; font-size: 12px; }
+
+        .blue { color: #60a5fa; }
+        .green { color: #4ade80; }
+        .red { color: #fb7185; }
+        .purple { color: #c4b5fd; }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.4fr) minmax(260px, 1fr);
+            gap: 20px;
+        }
+
+        .panel-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .muted { color: #8c9cb4; font-size: 12px; }
+
+        .pipeline {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 24px 0;
+        }
+
+        .stage {
+            background: #17253b;
+            border: 1px solid #31445f;
+            border-radius: 8px;
+            padding: 11px 12px;
+            font-size: 12px;
+        }
+
+        .arrow { color: #64748b; }
+
+        .empty {
+            text-align: center;
+            padding: 25px 10px;
+            border: 1px dashed #34445e;
+            border-radius: 10px;
+            color: #9aaac0;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .empty strong { color: #dbeafe; }
+
+        .button {
+            background: #2563eb;
+            color: white;
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .button:hover { background: #1d4ed8; }
+
+        .secondary {
+            background: #19263b;
+            border-color: #344761;
+            color: #dbeafe;
+        }
+
+        .secondary:hover { background: #243651; }
+
+        .divider { border: 0; border-top: 1px solid #263650; margin: 20px 0; }
+
+        .quick-action {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+
+        .footer { margin-top: 30px; color: #64748b; font-size: 12px; }
+
+        @media (max-width: 1000px) {
+            .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .content-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 650px) {
+            .layout { display: block; }
+            aside { width: 100%; padding: 18px; }
+            .tagline { margin-bottom: 15px; }
+            .nav-label { margin-top: 15px; }
+            main { padding: 22px 16px; }
+            h1 { font-size: 23px; }
+            .topbar { align-items: flex-start; flex-direction: column; }
+            .stats { gap: 10px; }
+            .card { padding: 15px; }
+            .stat-number { font-size: 25px; }
+        }
+    </style>
+</head>
+<body>
+<div class="layout">
+    <aside>
+        <div class="brand">◆ DeployX</div>
+        <div class="tagline">AUTOMATED DEPLOYMENT PLATFORM</div>
+
+
+        <div class="nav-label">Workspace</div>
+        <button type="button" class="nav-item active" data-view="overview">▦ &nbsp; Overview</button>
+        <button type="button" class="nav-item" data-view="repositories">⑂ &nbsp; Repositories</button>
+        <button type="button" class="nav-item" data-view="pipelines">⇄ &nbsp; CI/CD Pipelines</button>
+        <button type="button" class="nav-item" data-view="deployments">◷ &nbsp; Deployment History</button>
+
+        <div class="nav-label">Management</div>
+        <button type="button" class="nav-item" data-view="containers">⬡ &nbsp; Containers</button>
+        <button type="button" class="nav-item" data-view="security">⛨ &nbsp; Security</button>
+
+
+        <hr class="divider">
+        <div class="muted">MINI PROJECT · MCA</div>
+        <div class="muted" style="margin-top:8px">Cloud Computing &amp; DevOps</div>
+    </aside>
+
+    <main>
+        <header class="topbar">
+            <div>
+                <h1>Deployment Overview</h1>
+                <p class="subtitle">Manage your application delivery workflow from one place.</p>
+            </div>
+            <div class="status">● API ONLINE</div>
+        </header>
+
+        <h2 class="section-title">Platform Overview</h2>
+        <section class="card" style="margin-bottom:30px;">
+            <div class="panel-heading">
+                <h2 class="section-title" style="margin:0;">Connected Repositories</h2>
+                <span class="muted" id="repoListCount">Loading...</span>
+            </div>
+
+            <div id="repositoryList" class="empty">
+                Loading repositories...
+            </div>
+        </section>
+
+        <section class="stats">
+            <div class="card">
+                <div class="stat-label">Repositories</div>
+                <div class="stat-number blue" id="repositories">0</div>
+                <div class="stat-note">Configured projects</div>
+            </div>
+            <div class="card">
+                <div class="stat-label">Total Builds</div>
+                <div class="stat-number purple" id="builds">0</div>
+                <div class="stat-note">Pipeline executions</div>
+            </div>
+            <div class="card">
+                <div class="stat-label">Successful</div>
+                <div class="stat-number green" id="success">0</div>
+                <div class="stat-note">Completed successfully</div>
+            </div>
+            <div class="card">
+                <div class="stat-label">Failed Builds</div>
+                <div class="stat-number red" id="failed">0</div>
+                <div class="stat-note">Requiring investigation</div>
+            </div>
+        </section>
+
+        <section class="content-grid">
+            <div class="card">
+                <div class="panel-heading">
+                    <h2 class="section-title" style="margin:0">CI/CD Pipeline</h2>
+                    <span class="muted">WORKFLOW</span>
+                </div>
+
+                <div class="pipeline">
+                    <span class="stage">01 · Checkout</span>
+                    <span class="arrow">→</span>
+                    <span class="stage">02 · Test</span>
+                    <span class="arrow">→</span>
+                    <span class="stage">03 · Build</span>
+                    <span class="arrow">→</span>
+                    <span class="stage">04 · Deploy</span>
+                </div>
+
+
+                <div class="empty" id="pipelineHistory">
+                    Loading pipeline history...
+                </div>
+
+                <div class="quick-action">
+                    <span class="muted" id="pipelineHistoryNote">
+                        Loading recent pipeline runs...
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="card">
+                <div class="panel-heading">
+                    <h2 class="section-title" style="margin:0">Quick Actions</h2>
+                </div>
+
+                <div class="quick-action">
+                    <span>Connect a repository</span>
+                    <button class="button" id="repoButton">Add Repo</button>
+                </div>
+
+                <hr class="divider">
+
+                <div class="quick-action">
+                    <span>Check API health</span>
+                    <button class="button secondary" id="healthButton">Check Health</button>
+                </div>
+
+                <hr class="divider">
+
+                <div id="message" class="empty" aria-live="polite">
+                    Ready to configure your first deployment.
+                </div>
+            </div>
+        </section>
+
+        <div class="footer">
+            DeployX · Cloud &amp; DevOps Mini Project · Local Docker Environment
+        </div>
+    </main>
+</div>
+
+<script>
+    const message = document.getElementById("message");
+    async function loadRepositories() {
+    const list = document.getElementById("repositoryList");
+    const count = document.getElementById("repoListCount");
+
+    if (!list || !count) return;
+
+    try {
+        const response = await fetch("/api/repositories");
+        if (!response.ok) throw new Error("Could not load repositories");
+
+        const repositories = await response.json();
+        count.textContent = repositories.length + " connected";
+        document.getElementById("repositories").textContent = repositories.length;
+
+        if (repositories.length === 0) {
+            list.textContent = "No repositories added yet.";
+            return;
+        }
+
+        list.className = "";
+        list.replaceChildren();
+
+        repositories.forEach(repo => {
+            const item = document.createElement("div");
+            item.style.cssText =
+                "padding:14px 0;border-bottom:1px solid #263650;";
+
+            const name = document.createElement("strong");
+            name.textContent = repo.name;
+
+            const details = document.createElement("div");
+            details.style.cssText =
+                "margin-top:8px;font-size:13px;overflow-wrap:anywhere;";
+
+            const link = document.createElement("a");
+            link.textContent = repo.url;
+            link.href = repo.url;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.style.color = "#60a5fa";
+
+
+const branch = document.createElement("div");
+branch.style.cssText = "margin-top:6px;color:#91a0b7;";
+branch.textContent = "Branch: " + repo.branch;
+
+const detectButton = document.createElement("button");
+detectButton.type = "button";
+detectButton.textContent = "Detect Project";
+detectButton.style.cssText =
+    "margin-top:12px;padding:8px 14px;background:#2563eb;color:white;border:0;border-radius:6px;cursor:pointer;";
+
+const detectionResult = document.createElement("div");
+detectionResult.style.cssText =
+    "margin-top:10px;color:#91a0b7;font-size:13px;overflow-wrap:anywhere;";
+
+detectButton.addEventListener("click", async () => {
+    detectButton.disabled = true;
+    detectButton.textContent = "Detecting...";
+    detectionResult.textContent = "Analyzing repository...";
+
+    try {
+        const response = await fetch(
+            `/api/repositories/${repo.id}/detect`
+        );
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Detection failed.");
+        }
+
+        detectionResult.textContent =
+            "Project: " + data.project_type +
+            " | Language: " + data.language +
+            " | Files: " + (data.detected_files.join(", ") || "None found");
+    } catch (error) {
+        detectionResult.textContent =
+            error.message || "Project detection failed.";
+    } finally {
+        detectButton.disabled = false;
+        detectButton.textContent = "Detect Project";
+    }
+});
+
+
+const checkoutButton = document.createElement("button");
+checkoutButton.type = "button";
+checkoutButton.textContent = "Checkout Repository";
+checkoutButton.style.cssText =
+    "margin:12px 8px 0 0;padding:8px 14px;background:#0f766e;color:white;border:0;border-radius:6px;cursor:pointer;";
+
+const checkoutResult = document.createElement("div");
+checkoutResult.style.cssText =
+    "margin-top:10px;color:#91a0b7;font-size:13px;overflow-wrap:anywhere;";
+
+checkoutButton.addEventListener("click", async () => {
+    checkoutButton.disabled = true;
+    checkoutButton.textContent = "Checking out...";
+    checkoutResult.textContent = "Sending checkout request...";
+
+    try {
+        const response = await fetch(
+            `/api/repositories/${repo.id}/checkout`,
+            { method: "POST" }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Checkout failed.");
+        }
+
+        checkoutResult.textContent =
+            data.message ||
+            `Checkout ${data.status || "completed"}.`;
+    } catch (error) {
+        checkoutResult.textContent =
+            error.message || "Checkout request failed.";
+    } finally {
+        checkoutButton.disabled = false;
+        checkoutButton.textContent = "Checkout Repository";
+    }
+});
+
+
+const testButton = document.createElement("button");
+testButton.type = "button";
+testButton.textContent = "Test Project";
+testButton.style.cssText =
+    "margin:12px 8px 0 0;padding:8px 14px;background:#7c3aed;color:white;border:0;border-radius:6px;cursor:pointer;";
+
+const testResult = document.createElement("div");
+testResult.style.cssText =
+    "margin-top:10px;color:#91a0b7;font-size:13px;overflow-wrap:anywhere;";
+
+testButton.addEventListener("click", async () => {
+    testButton.disabled = true;
+    testButton.textContent = "Testing...";
+    testResult.textContent = "Validating project...";
+
+    try {
+        const response = await fetch(
+            `/api/repositories/${repo.id}/test`,
+            { method: "POST" }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            const errorDetails = data.errors
+                ? data.errors.map(item =>
+                    `${item.file || "Project"}: ${item.error}`
+                ).join(" | ")
+                : data.error || "Validation failed.";
+
+            throw new Error(errorDetails);
+        }
+
+        testResult.textContent =
+            `Status: ${data.status} | Checked: ${data.checked_count} | ` +
+            `Files: ${data.checks.join(", ")}`;
+
+    } catch (error) {
+        testResult.textContent =
+            error.message || "Project validation failed.";
+    } finally {
+        testButton.disabled = false;
+        testButton.textContent = "Test Project";
+    }
+});
+
+
+const buildButton = document.createElement("button");
+buildButton.type = "button";
+buildButton.textContent = "Build Project";
+buildButton.style.cssText =
+    "margin:12px 8px 0 0;padding:8px 14px;background:#b45309;color:white;border:0;border-radius:6px;cursor:pointer;";
+
+const buildResult = document.createElement("div");
+buildResult.style.cssText =
+    "margin-top:10px;color:#91a0b7;font-size:13px;overflow-wrap:anywhere;";
+
+buildButton.addEventListener("click", async () => {
+    buildButton.disabled = true;
+    buildButton.textContent = "Building...";
+    buildResult.textContent = "Creating source ZIP artifact...";
+
+    try {
+        const response = await fetch(
+            `/api/repositories/${repo.id}/build`,
+            { method: "POST" }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                data.error || data.details || "Build failed."
+            );
+        }
+
+
+buildResult.replaceChildren();
+
+const summary = document.createElement("div");
+summary.textContent =
+    `Build: ${data.pipeline_status || data.status} | ` +
+    `Artifact: ${data.artifact} | ` +
+    `Files: ${data.file_count} | Run #${data.run_id}`;
+
+const downloadLink = document.createElement("a");
+downloadLink.href = `/api/pipeline-runs/${data.run_id}/artifact`;
+downloadLink.textContent = "Download ZIP Artifact";
+downloadLink.download = data.artifact;
+downloadLink.style.cssText =
+    "display:inline-block;margin-top:10px;color:#60a5fa;text-decoration:underline;";
+
+buildResult.append(summary, downloadLink);
+
+
+        if (typeof loadPipelineStats === "function") {
+            loadPipelineStats();
+        }
+
+        if (typeof loadPipelineHistory === "function") {
+            loadPipelineHistory();
+        }
+
+    } catch (error) {
+        buildResult.textContent =
+            error.message || "Could not build the project.";
+    } finally {
+        buildButton.disabled = false;
+        buildButton.textContent = "Build Project";
+    }
+});
+
+
+const runPipelineButton = document.createElement("button");
+runPipelineButton.type = "button";
+runPipelineButton.textContent = "Run Full Pipeline";
+runPipelineButton.style.cssText =
+    "margin:12px 8px 0 0;padding:9px 15px;background:#0f766e;color:white;border:0;border-radius:6px;cursor:pointer;font-weight:600;";
+
+const pipelineResult = document.createElement("div");
+pipelineResult.style.cssText =
+    "margin-top:10px;color:#91a0b7;font-size:13px;overflow-wrap:anywhere;";
+
+runPipelineButton.addEventListener("click", async () => {
+    runPipelineButton.disabled = true;
+    buildButton.disabled = true;
+    runPipelineButton.textContent = "Pipeline Running...";
+    pipelineResult.textContent = "Step 1/3: Testing project...";
+
+    try {
+        // STEP 1: TEST
+        const testResponse = await fetch(
+            `/api/repositories/${repo.id}/test`,
+            { method: "POST" }
+        );
+        const testData = await testResponse.json();
+
+        if (!testResponse.ok || testData.status !== "passed") {
+            throw new Error(
+                "Test failed: " +
+                (testData.error || "Project validation did not pass.")
+            );
+        }
+
+        pipelineResult.textContent =
+            "Test passed. Step 2/3: Building ZIP artifact...";
+
+        // STEP 2: BUILD
+        const buildResponse = await fetch(
+            `/api/repositories/${repo.id}/build`,
+            { method: "POST" }
+        );
+        const buildData = await buildResponse.json();
+
+        if (!buildResponse.ok || buildData.status !== "success") {
+            throw new Error(
+                "Build failed: " +
+                (buildData.error || buildData.message || "Unknown error.")
+            );
+        }
+
+        pipelineResult.textContent =
+            "Build successful. Step 3/3: Deploying application...";
+
+        // STEP 3: DEPLOY THE SUCCESSFUL BUILD
+        const deployResponse = await fetch(
+            `/api/repositories/${repo.id}/deploy`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ run_id: buildData.run_id })
+            }
+        );
+        const deployData = await deployResponse.json();
+
+        if (!deployResponse.ok || deployData.status !== "deployed") {
+            throw new Error(
+                "Deployment failed: " +
+                (deployData.error || deployData.message || "Unknown error.")
+            );
+        }
+
+        pipelineResult.replaceChildren();
+
+        const successMessage = document.createElement("div");
+        successMessage.style.color = "#22c55e";
+        successMessage.textContent =
+            "PIPELINE SUCCESS — Test passed | Build: " +
+            buildData.artifact + " | Deployment run #" +
+            deployData.deployment_run_id;
+
+        const downloadLink = document.createElement("a");
+        downloadLink.href =
+            `/api/pipeline-runs/${buildData.run_id}/artifact`;
+        downloadLink.textContent = "Download ZIP Artifact";
+        downloadLink.download = buildData.artifact;
+        downloadLink.style.cssText =
+            "display:inline-block;margin-top:8px;color:#60a5fa;text-decoration:underline;";
+
+        pipelineResult.append(successMessage, downloadLink);
+
+    } catch (error) {
+        pipelineResult.textContent =
+            error.message || "Pipeline failed.";
+        pipelineResult.style.color = "#f87171";
+
+    } finally {
+        runPipelineButton.disabled = false;
+        runPipelineButton.textContent = "Run Full Pipeline";
+        buildButton.disabled = false;
+
+        if (typeof loadPipelineStats === "function") {
+            loadPipelineStats();
+        }
+
+        if (typeof loadPipelineHistory === "function") {
+            loadPipelineHistory();
+        }
+    }
+});
+
+
+details.append(
+    link,
+    branch,
+    detectButton,
+    detectionResult,
+    checkoutButton,
+    checkoutResult,
+    testButton,
+    testResult,
+    buildButton,
+    buildResult,
+    runPipelineButton,
+    pipelineResult
+);
+
+
+item.append(name, details);
+list.appendChild(item);
+
+        });
+    } catch (error) {
+        count.textContent = "Unavailable";
+        list.textContent = "Could not load repositories. Please refresh.";
+    }
+}
+    document.getElementById("healthButton").addEventListener("click", async () => {
+        message.textContent = "Checking API health...";
+
+        try {
+            const response = await fetch("/health");
+            if (!response.ok) throw new Error("Health check failed");
+
+            const data = await response.json();
+            message.textContent = "API Status: " + data.status;
+        } catch (error) {
+            message.textContent = "Health check failed. Please check the backend.";
+        }
+    });
+
+    document.getElementById("repoButton").addEventListener("click", async () => {
+    const url = prompt("Enter your GitHub repository URL:");
+    if (!url) return;
+
+    const branch = prompt("Enter branch name:", "main");
+    if (!branch) return;
+
+    try {
+        const response = await fetch("/api/repositories", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url, branch })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            message.textContent = result.error || "Could not save repository.";
+            return;
+        }
+
+        message.textContent = result.message;
+        document.getElementById("repositories").textContent =
+            Number(document.getElementById("repositories").textContent) + 1;
+    } catch (error) {
+        message.textContent = "Could not connect to DeployX backend.";
+    }
+});
+
+async function loadPipelineHistory() {
+    const history = document.getElementById("pipelineHistory");
+    const note = document.getElementById("pipelineHistoryNote");
+
+    if (!history || !note) return;
+
+    try {
+        const response = await fetch("/api/pipeline-runs");
+
+        if (!response.ok) {
+            throw new Error("Could not load pipeline history.");
+        }
+
+        const runs = await response.json();
+
+        history.replaceChildren();
+
+        if (runs.length === 0) {
+            history.className = "empty";
+            history.textContent = "No pipeline runs recorded yet.";
+            note.textContent = "Run Test Project to create your first record.";
+            return;
+        }
+
+        history.className = "";
+        history.style.cssText = "display:grid;gap:12px;padding:0;";
+
+        runs.slice(0, 5).forEach(run => {
+            const card = document.createElement("div");
+            card.style.cssText =
+                "padding:12px;border:1px solid #263650;border-radius:8px;";
+
+            const heading = document.createElement("div");
+            heading.style.cssText =
+                "display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;";
+
+            const name = document.createElement("strong");
+            name.textContent = run.repository_name || "Repository";
+
+            const status = document.createElement("span");
+            status.textContent = (run.status || "unknown").toUpperCase();
+            status.style.color =
+                run.status === "success" ? "#22c55e" :
+                run.status === "failed" ? "#f87171" : "#93c5fd";
+
+            heading.append(name, status);
+
+            const details = document.createElement("div");
+            details.style.cssText =
+                "margin-top:8px;font-size:13px;color:#91a0b7;overflow-wrap:anywhere;";
+
+            const date = run.started_at
+                ? new Date(run.started_at).toLocaleString()
+                : "Time unavailable";
+
+            const duration = Number.isFinite(Number(run.duration_seconds))
+                ? `${run.duration_seconds}s`
+                : "N/A";
+
+            details.textContent =
+                `Run #${run.id} · Branch: ${run.branch} · ` +
+                `Stage: ${run.stage} · Duration: ${duration} · ${date}`;
+
+            card.append(heading, details);
+            history.appendChild(card);
+        });
+
+        note.textContent = `Showing ${Math.min(runs.length, 5)} most recent run(s).`;
+
+    } catch (error) {
+        history.className = "empty";
+        history.textContent = "Could not load pipeline history.";
+        note.textContent = "Refresh the page and try again.";
+        console.error("Pipeline history error:", error);
+    }
+}
+
+
+async function loadPipelineStats() {
+    try {
+        const response = await fetch("/api/pipeline-runs");
+
+        if (!response.ok) {
+            throw new Error("Could not load pipeline history");
+        }
+
+        const runs = await response.json();
+
+        document.getElementById("builds").textContent = runs.length;
+
+        document.getElementById("success").textContent =
+            runs.filter(run => run.status === "success").length;
+
+        document.getElementById("failed").textContent =
+            runs.filter(run => run.status === "failed").length;
+
+    } catch (error) {
+        console.error("Pipeline statistics could not be loaded:", error);
+    }
+}
+
+
+const navMain = document.querySelector("main");
+const navTopbar = navMain.querySelector(".topbar");
+const navHeading = navTopbar.querySelector("h1");
+const navSubtitle = navTopbar.querySelector(".subtitle");
+const navFooter = navMain.querySelector(".footer");
+
+const navDefaultHeading = navHeading.textContent;
+const navDefaultSubtitle = navSubtitle.textContent;
+
+const navViews = {
+    overview: {
+        title: navDefaultHeading,
+        subtitle: navDefaultSubtitle
+    },
+    repositories: {
+        title: "Repositories",
+        subtitle: "Manage and inspect connected GitHub repositories."
+    },
+    pipelines: {
+        title: "CI/CD Pipelines",
+        subtitle: "Review pipeline runs, stages, results and logs."
+    },
+    deployments: {
+        title: "Deployment History",
+        subtitle: "Review application deployment records and results."
+    },
+    containers: {
+        title: "Containers",
+        subtitle: "Check DeployX service health and GUI access."
+    },
+    security: {
+        title: "Security",
+        subtitle: "Run basic API and repository validation checks."
+    }
+};
+
+const navOriginalElements = Array.from(navMain.children).filter(
+    element => element !== navTopbar && element !== navFooter
+);
+
+const navPanel = document.createElement("section");
+navPanel.className = "card";
+navPanel.hidden = true;
+navPanel.style.marginBottom = "30px";
+navTopbar.insertAdjacentElement("afterend", navPanel);
+
+function navElement(tag, text, className = "") {
+    const element = document.createElement(tag);
+    element.textContent = text;
+    if (className) element.className = className;
+    return element;
+}
+
+function navButton(text, handler, secondary = false) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = secondary ? "button secondary" : "button";
+    button.textContent = text;
+    button.addEventListener("click", handler);
+    return button;
+}
+
+function navCard(title, description) {
+    const card = document.createElement("div");
+    card.style.cssText =
+        "padding:16px;margin-top:12px;border:1px solid #263650;" +
+        "border-radius:10px;background:#101a2d;overflow-wrap:anywhere;";
+
+    const heading = navElement("h3", title);
+    heading.style.cssText = "font-size:15px;margin-bottom:8px;";
+
+    const details = navElement("p", description);
+    details.style.cssText =
+        "font-size:13px;color:#91a0b7;line-height:1.7;";
+
+    card.append(heading, details);
+    return card;
+}
+
+async function navRequest(url, options = {}) {
+    const response = await fetch(url, options);
+    let data = {};
+
+    try {
+        data = await response.json();
+    } catch {
+        data = {};
+    }
+
+    if (!response.ok) {
+        throw new Error(data.error || `Request failed (${response.status}).`);
+    }
+
+    return data;
+}
+
+function navShowMessage(container, text, success = true) {
+    const result = navElement("p", text);
+    result.style.cssText =
+        `margin-top:10px;font-size:13px;overflow-wrap:anywhere;color:` +
+        (success ? "#4ade80" : "#fb7185");
+    container.appendChild(result);
+}
+
+function navRefreshHistory() {
+    if (typeof loadPipelineStats === "function") loadPipelineStats();
+    if (typeof loadPipelineHistory === "function") loadPipelineHistory();
+}
+
+async function navRenderRepositories() {
+    navPanel.replaceChildren();
+
+    const toolbar = navElement("div", "");
+    toolbar.style.cssText =
+        "display:flex;justify-content:space-between;align-items:center;" +
+        "gap:12px;flex-wrap:wrap;margin-bottom:16px;";
+
+    toolbar.append(
+        navElement("h2", "Connected Repositories", "section-title")
+    );
+
+    const addButton = navButton("Add Repository", async () => {
+        const url = prompt("Enter your HTTPS GitHub repository URL:");
+        if (!url) return;
+
+        const branch = prompt("Enter branch name:", "main");
+        if (!branch) return;
+
+        try {
+            await navRequest("/api/repositories", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ url, branch })
+            });
+
+            await navRenderRepositories();
+            navRefreshHistory();
+        } catch (error) {
+            navShowMessage(navPanel, error.message, false);
+        }
+    });
+
+    toolbar.appendChild(addButton);
+    navPanel.appendChild(toolbar);
+
+    try {
+        const repositories = await navRequest("/api/repositories");
+
+        if (repositories.length === 0) {
+            navPanel.appendChild(
+                navElement("p", "No repositories connected yet.")
+            );
+            return;
+        }
+
+        for (const repo of repositories) {
+            const card = navCard(
+                repo.name,
+                `Branch: ${repo.branch} · Repository ID: ${repo.id}`
+            );
+
+            const link = navElement("a", repo.url);
+            link.href = repo.url;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.style.cssText =
+                "display:block;margin-top:8px;color:#60a5fa;font-size:13px;";
+            card.appendChild(link);
+
+            const actions = navElement("div", "");
+            actions.style.cssText =
+                "display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;";
+
+            const result = navElement("div", "");
+            result.setAttribute("aria-live", "polite");
+
+            const actionsToCreate = [
+                {
+                    label: "Detect",
+                    run: () => navRequest(
+                        `/api/repositories/${repo.id}/detect`
+                    )
+                },
+                {
+                    label: "Checkout",
+                    run: () => navRequest(
+                        `/api/repositories/${repo.id}/checkout`,
+                        { method: "POST" }
+                    )
+                },
+                {
+                    label: "Test",
+                    run: () => navRequest(
+                        `/api/repositories/${repo.id}/test`,
+                        { method: "POST" }
+                    )
+                },
+                {
+                    label: "Build ZIP",
+                    run: () => navRequest(
+                        `/api/repositories/${repo.id}/build`,
+                        { method: "POST" }
+                    )
+                }
+            ];
+
+            for (const action of actionsToCreate) {
+                actions.appendChild(navButton(action.label, async event => {
+                    const button = event.currentTarget;
+                    button.disabled = true;
+                    result.replaceChildren();
+                    result.textContent = `${action.label} in progress...`;
+
+                    try {
+                        const data = await action.run();
+                        result.replaceChildren();
+
+                        const summary = data.project_type
+                            ? `Project: ${data.project_type}; Language: ${data.language}`
+                            : data.message ||
+                              `Status: ${data.pipeline_status || data.status || "completed"}`;
+
+                        navShowMessage(result, summary);
+
+                        if (data.artifact && data.run_id) {
+                            const download = navElement(
+                                "a", "Download ZIP Artifact"
+                            );
+                            download.href =
+                                `/api/pipeline-runs/${data.run_id}/artifact`;
+                            download.style.cssText =
+                                "display:block;margin-top:8px;color:#60a5fa;";
+                            result.appendChild(download);
+                        }
+
+                        navRefreshHistory();
+                    } catch (error) {
+                        result.replaceChildren();
+                        navShowMessage(result, error.message, false);
+                    } finally {
+                        button.disabled = false;
+                    }
+                }, true));
+            }
+
+            card.append(actions, result);
+            navPanel.appendChild(card);
+        }
+    } catch (error) {
+        navPanel.appendChild(
+            navCard("Could not load repositories", error.message)
+        );
+    }
+}
+
+async function navRenderRuns(view) {
+    navPanel.replaceChildren();
+
+    const heading = view === "deployments"
+        ? "Deployment Records"
+        : "Pipeline Runs";
+
+    navPanel.appendChild(navElement("h2", heading, "section-title"));
+
+    try {
+        const runs = await navRequest("/api/pipeline-runs");
+
+        const visibleRuns = view === "deployments"
+            ? runs.filter(run =>
+                ["deployed", "deploy_failed", "deployment"].includes(run.stage)
+            )
+            : runs;
+
+        if (view === "pipelines") {
+            const filter = document.createElement("select");
+            filter.className = "button secondary";
+            filter.style.marginBottom = "14px";
+
+            [
+                ["all", "All statuses"],
+                ["success", "Success"],
+                ["failed", "Failed"],
+                ["running", "Running"]
+            ].forEach(([value, label]) => {
+                const option = document.createElement("option");
+                option.value = value;
+                option.textContent = label;
+                filter.appendChild(option);
+            });
+
+            navPanel.appendChild(filter);
+
+            const records = navElement("div", "");
+            navPanel.appendChild(records);
+
+            const renderFiltered = () => {
+                records.replaceChildren();
+
+                const filtered = filter.value === "all"
+                    ? visibleRuns
+                    : visibleRuns.filter(run => run.status === filter.value);
+
+                navRenderRunCards(records, filtered);
+            };
+
+            filter.addEventListener("change", renderFiltered);
+            renderFiltered();
+            return;
+        }
+
+        navRenderRunCards(navPanel, visibleRuns);
+    } catch (error) {
+        navShowMessage(navPanel, error.message, false);
+    }
+}
+
+function navRenderRunCards(container, runs) {
+    if (runs.length === 0) {
+        container.appendChild(
+            navElement("p", "No matching records found.")
+        );
+        return;
+    }
+
+    for (const run of runs) {
+        const card = navCard(
+            `Run #${run.id} · ${run.repository_name || "Repository"}`,
+            `Stage: ${run.stage} · Branch: ${run.branch} · ` +
+            `Started: ${run.started_at || "N/A"} · ` +
+            `Duration: ${run.duration_seconds ?? "N/A"} seconds`
+        );
+
+        const status = navElement(
+            "strong",
+            `Status: ${(run.status || "unknown").toUpperCase()}`
+        );
+        status.style.color =
+            run.status === "success" ? "#4ade80" :
+            run.status === "failed" ? "#fb7185" : "#93c5fd";
+
+        card.appendChild(status);
+
+        if (run.logs) {
+            const details = document.createElement("details");
+            details.style.marginTop = "10px";
+
+            const summary = navElement("summary", "View logs");
+            summary.style.cursor = "pointer";
+
+            const log = navElement("pre", run.logs);
+            log.style.cssText =
+                "margin-top:8px;white-space:pre-wrap;overflow-wrap:anywhere;" +
+                "font-size:12px;color:#b9c7da;";
+
+            details.append(summary, log);
+            card.appendChild(details);
+        }
+
+        container.appendChild(card);
+    }
+}
+
+async function navRenderContainers() {
+    navPanel.replaceChildren();
+    navPanel.appendChild(navElement("h2", "Service Health", "section-title"));
+
+    try {
+        const [healthResponse, statusResponse] = await Promise.all([
+            navRequest("/health"),
+            navRequest("/api/status")
+        ]);
+
+        navPanel.appendChild(
+            navCard(
+                "DeployX Web API",
+                `Status: ${healthResponse.status}`
+            )
+        );
+
+        navPanel.appendChild(
+            navCard(
+                "Repository Database",
+                `API status: ${statusResponse.status} · ` +
+                `Registered repositories: ${statusResponse.repositories}`
+            )
+        );
+
+        const guiCard = navCard(
+            "Smart Route Analyzer GUI",
+            "Browser-accessible GUI service on the local machine."
+        );
+
+        const guiLink = navElement("a", "Open GUI Console");
+        guiLink.href = "http://localhost:6081/vnc.html";
+        guiLink.target = "_blank";
+        guiLink.rel = "noopener noreferrer";
+        guiLink.style.cssText =
+            "display:inline-block;margin-top:10px;color:#60a5fa;";
+
+        guiCard.appendChild(guiLink);
+        navPanel.appendChild(guiCard);
+
+        navPanel.appendChild(navCard(
+            "Worker API",
+            "This service runs on the private Docker network. Its individual " +
+            "health is not yet exposed through a dashboard endpoint."
+        ));
+    } catch (error) {
+        navShowMessage(navPanel, error.message, false);
+    }
+}
+
+async function navRenderSecurity() {
+    navPanel.replaceChildren();
+    navPanel.appendChild(navElement("h2", "Security Checks", "section-title"));
+    navPanel.appendChild(navElement(
+        "p",
+        "Run basic checks against the current DeployX API."
+    ));
+
+    const runChecks = navButton("Run Security Checks", async event => {
+        event.currentTarget.disabled = true;
+        runChecks.textContent = "Checking...";
+        navPanel.querySelector("#securityResults")?.remove();
+
+        const results = navElement("div", "");
+        results.id = "securityResults";
+        results.style.marginTop = "14px";
+        navPanel.appendChild(results);
+
+        try {
+            const health = await navRequest("/health");
+            navShowMessage(results, `API health: ${health.status}`);
+
+            const validationResponse = await fetch("/api/repositories", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    url: "http://invalid.example/repository",
+                    branch: "main"
+                })
+            });
+
+            if (validationResponse.status === 400) {
+                navShowMessage(
+                    results,
+                    "Repository URL validation: invalid HTTP URL correctly rejected."
+                );
+            } else {
+                navShowMessage(
+                    results,
+                    `Repository URL validation returned HTTP ${validationResponse.status}.`,
+                    false
+                );
+            }
+
+            navPanel.appendChild(navCard(
+                "Security limitation",
+                "These are basic validation checks, not a full security audit. " +
+                "Deploying a ZIP executes its Python application code; deploy only trusted source."
+            ));
+        } catch (error) {
+            navShowMessage(results, error.message, false);
+        } finally {
+            runChecks.disabled = false;
+            runChecks.textContent = "Run Security Checks";
+        }
+    });
+
+    navPanel.appendChild(runChecks);
+}
+
+async function navShowView(view) {
+    if (!navViews[view]) return;
+
+    document.querySelectorAll(".nav-item[data-view]").forEach(button => {
+        button.classList.toggle("active", button.dataset.view === view);
+        button.setAttribute(
+            "aria-current",
+            button.dataset.view === view ? "page" : "false"
+        );
+    });
+
+    navHeading.textContent = navViews[view].title;
+    navSubtitle.textContent = navViews[view].subtitle;
+
+    const isOverview = view === "overview";
+
+    navOriginalElements.forEach(element => {
+        element.hidden = !isOverview;
+    });
+
+    navPanel.hidden = isOverview;
+
+    if (isOverview) {
+        navRefreshHistory();
+        return;
+    }
+
+    navPanel.replaceChildren();
+    navPanel.appendChild(navElement("p", "Loading page data..."));
+
+    if (view === "repositories") {
+        await navRenderRepositories();
+    } else if (view === "pipelines" || view === "deployments") {
+        await navRenderRuns(view);
+    } else if (view === "containers") {
+        await navRenderContainers();
+    } else if (view === "security") {
+        await navRenderSecurity();
+    }
+}
+
+document.querySelectorAll(".nav-item[data-view]").forEach(button => {
+    button.addEventListener("click", () => {
+        navShowView(button.dataset.view);
+    });
+});
+
+
+loadRepositories();
+loadPipelineStats();
+loadPipelineHistory();
+</script>
+</body>
+</html>

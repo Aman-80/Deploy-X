@@ -1,0 +1,63 @@
+
+services:
+  deployx-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: deployx-app
+    ports:
+      - "5001:5000"
+    volumes:
+      - deployx-data:/data
+      - deployx-repos:/repositories:ro
+      - deployx-artifacts:/artifacts:ro
+    restart: unless-stopped
+
+  deployx-worker:
+    build:
+      context: ./pipeline
+      dockerfile: Dockerfile
+    container_name: deployx-worker
+    profiles:
+      - pipeline
+    working_dir: /workspace
+    volumes:
+      - deployx-repos:/workspace
+      - deployx-artifacts:/artifacts
+    command: ["python", "/pipeline/checkout.py"]
+    restart: "no"
+
+  deployx-worker-api:
+    build:
+      context: ./pipeline
+      dockerfile: Dockerfile
+    container_name: deployx-worker-api
+    working_dir: /workspace
+    volumes:
+      - deployx-repos:/workspace
+      - deployx-artifacts:/artifacts
+    command: ["python", "/pipeline/worker_api.py"]
+    expose:
+      - "8000"
+    restart: unless-stopped
+
+  deployx-gui:
+    build:
+      context: ./sample-app
+      dockerfile: Dockerfile
+    container_name: deployx-gui
+    ports:
+      - "127.0.0.1:6081:6081"
+    expose:
+      - "6082"
+    volumes:
+      - deployx-repos:/workspace:ro
+      - deployx-gui-data:/app/project
+      - deployx-artifacts:/artifacts:ro
+    restart: unless-stopped
+
+volumes:
+  deployx-data:
+  deployx-repos:
+  deployx-artifacts:
+  deployx-gui-data:
