@@ -289,3 +289,8 @@ It was developed as a hands-on MCA Cloud Computing and DevOps project.
 ---
 
 **DeployX — Automating the Journey from Repository to Deployment.**
+## Project Screenshots
+
+### Docker Container Monitoring Dashboard
+
+![DeployX Containers Dashboard](docs/screenshots/deployx-containers-dashboard.png)
