@@ -81,6 +81,10 @@ class WorkerHandler(BaseHTTPRequestHandler):
             self.handle_project_build()
             return
 
+        if route == "/generate-configs":
+            self.handle_generate_configs()
+            return
+
         if route == "/checkout":
             self.handle_checkout()
             return
@@ -300,6 +304,80 @@ class WorkerHandler(BaseHTTPRequestHandler):
 
         except Exception:
             send_json(self, 500, {"error": "Project build failed."})
+
+
+    def handle_generate_configs(self):
+        try:
+            data = self.read_json_body()
+            repo_name = data.get("repository", "")
+            project_path = self.get_repository_path(repo_name)
+
+            if project_path is None:
+                send_json(self, 404, {
+                    "error": "Valid Git repository not found."
+                })
+                return
+
+            if not os.path.isdir(ARTIFACT_DIR):
+                send_json(self, 500, {
+                    "error": "Persistent artifact storage is unavailable."
+                })
+                return
+
+            output_path = os.path.join(
+                ARTIFACT_DIR,
+                "generated-configs",
+                repo_name
+            )
+
+            env = os.environ.copy()
+            env["PROJECT_PATH"] = project_path
+            env["GENERATED_CONFIG_PATH"] = output_path
+
+            result = subprocess.run(
+                ["python", "/pipeline/generate_configs.py"],
+                env=env,
+                capture_output=True,
+                text=True,
+                timeout=60,
+                check=False,
+            )
+
+            try:
+                output = json.loads(result.stdout)
+            except (ValueError, TypeError):
+                send_json(self, 500, {
+                    "error": "Configuration generator returned invalid output.",
+                    "details": (result.stderr or result.stdout)[-2000:]
+                })
+                return
+
+            successful = (
+                result.returncode == 0
+                and output.get("status") == "success"
+            )
+
+            send_json(
+                self,
+                200 if successful else 422,
+                output
+            )
+
+        except subprocess.TimeoutExpired:
+            send_json(self, 504, {
+                "error": "Configuration generation timed out."
+            })
+
+        except (ValueError, UnicodeDecodeError):
+            send_json(self, 400, {
+                "error": "Invalid JSON request."
+            })
+
+        except Exception:
+            send_json(self, 500, {
+                "error": "Configuration generation failed."
+            })
+
 
     def log_message(self, format_string, *args):
         print("DeployX worker:", format_string % args)

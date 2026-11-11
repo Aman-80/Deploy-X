@@ -12,5 +12,6 @@ COPY detect_project.py /pipeline/detect_project.py
 COPY worker_api.py /pipeline/worker_api.py
 COPY test_project.py /pipeline/test_project.py
 COPY build_project.py /pipeline/build_project.py
+COPY generate_configs.py /pipeline/generate_configs.py
 
 CMD ["python", "/pipeline/checkout.py"]

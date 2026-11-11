@@ -18,6 +18,7 @@ try:
     from .detect_project import detect_project
     from .strategy_engine import select_strategy
     from .generator_registry import GeneratorRegistry
+    from .plugin_loader import PluginLoader
     from .config_validator import validate_artifacts
 
 except ImportError:
@@ -32,6 +33,9 @@ class DeploymentOrchestrator:
 
     def __init__(self, registry=None):
         self.registry = registry if registry is not None else GeneratorRegistry()
+
+        self.plugin_loader = PluginLoader(self.registry)
+        self.plugin_load_result = self.plugin_loader.load_plugins()
 
     def analyze_project(self, project_path):
 

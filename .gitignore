@@ -21,3 +21,9 @@ artifacts/
 # Test and editor cache
 .pytest_cache/
 .mypy_cache/
+
+# DeployX local test bundles
+/deployx-test-output*/
+
+# Local generator backup
+/pipeline/generate_configs.py.backup
